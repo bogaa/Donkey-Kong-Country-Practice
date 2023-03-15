@@ -1,4 +1,5 @@
-.rom
+.rom/*.smc
 bkp
 *.zip
 DKC_Practice_Rom.sfc
+code/.bkp
