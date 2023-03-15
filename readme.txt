@@ -9,7 +9,7 @@ Special thanks to Mattrizzle for sharing infos about the game.
 Also Rainbow here a link to his hacking discord: https://discord.gg/qSYRzMqD4F 
 
 -  Game loads full save at startup and in the file select screen hit select to listen to different music tracks.
--  Start Select out of any level.
+-  Start Select out of any level except boss rooms.
 
 In game pause menu:
 - Lives press right left to choose amount of lives press B to remove current level checkpoint.
@@ -31,6 +31,8 @@ Database: No-Intro: Super Nintendo Entertainment System (v. 20210222-050638)
 File/ROM SHA-1: 0FCEE45D9AF5D2F62995ED4B04D22146B906C86B
 File/ROM CRC32: C946DCA0
 
+
+To patch with Asar you need to creat a .rom folder and put rom mentioned above in there. Also rename it as you see above (Donkey Kong Country (V1.0) (U).smc)  
 There are a lot of bugs I did not bother to fix so far. Here are the once that come to my mind.
 
 - water,snow,cave levels seem to load artefacts sometimes.
