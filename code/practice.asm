@@ -390,8 +390,18 @@ pullPC		; -----------------------	; freeSpace  -------------------------------
 		JMP.W (!jumpTableE0) 
 		
 	saveStateRoutines:
-		dw $0000,bufferFrameSave,saveFrame00,saveFrame01,saveFrame02,saveFrame03,saveFrame04_DMA,saveFrame05_DMA,saveFrame06_DMA,saveFrameFF 
+		dw $0000,bufferFrameSave,savePaletteAnim,saveFrame00,saveFrame01,saveFrame02,saveFrame03,saveFrame04_DMA,saveFrame05_DMA,saveFrame06_DMA,saveFrameFF 
 	
+	
+	savePaletteAnim:
+		LDX.W #$0000   			; src							
+		LDY.W #$e000   			; des 
+		LDA #$15fe   			; size 
+		MVN $7F,$7F  			; bank des src	
+		
+		jsr incSaveFlag		
+		rts 
+		
 	saveFrame00:
 		LDX.W #$0002   		; src								; methode without DMA is slow enough not to finish 1c00 bytes 
 		LDY.W #$8100   		; des $7f8100
@@ -403,20 +413,20 @@ pullPC		; -----------------------	; freeSpace  -------------------------------
 		LDA #$01ff   			; size 
 		MVN $7F,$7E  			; bank des src	
 
-		lda.l rJungleWeatherEffects		; will break colors when palette animations go on 
-		bne +	
-
-		sep #$20	
-		ldx #$0000			; backup palettes 
-		lda #$00
-		sta.l $802121
-	-	lda.l $80213b
-		sta.l $7ffe00,x 
-		inx
-		cpx #$00200
-		bmi - 
+;		lda.l rJungleWeatherEffects		; will break colors when palette animations go on 
+;		bne +	
+;
+;		sep #$20	
+;		ldx #$0000			; backup palettes 
+;		lda #$00
+;		sta.l $802121
+;	-	lda.l $80213b
+;		sta.l $7ffe00,x 
+;		inx
+;		cpx #$00200
+;		bmi - 
 		
-	+	rep #$30 
+;	+	rep #$30 
 
 		jsr incSaveFlag		
 		rts 
@@ -548,7 +558,16 @@ pullPC		; -----------------------	; freeSpace  -------------------------------
 		JMP.W (!jumpTableE0) 
 		
 	loadStateRoutines:
-		dw $0000,bufferFrameLoad,loadFrame00,loadFrame01,loadFrame02,loadFrame03,loadFrame04_DMA,loadFrame05_DMA,loadFrame06_DMA,loadFrameFF
+		dw $0000,bufferFrameLoad,loadPaletteAnim,loadFrame00,loadFrame01,loadFrame02,loadFrame03,loadFrame04_DMA,loadFrame05_DMA,loadFrame06_DMA,loadFrameFF
+
+	loadPaletteAnim:			; breajs sine levels 
+		LDX.W #$e000   			; src							
+		LDY.W #$0000   			; des 
+		LDA #$15fe   			; size 
+		MVN $7F,$7F  			; bank des src	
+		
+		jsr incLoadFlag	
+		rts 
 
 	loadFrame00:				
 		LDX.W #$8100				; src
@@ -561,20 +580,20 @@ pullPC		; -----------------------	; freeSpace  -------------------------------
 		LDA #$01ff   				; size 
 		MVN $7E,$7F  				; bank des src	
 
-		lda.l rJungleWeatherEffects
-		bne +
+;		lda.l rJungleWeatherEffects
+;		bne +
+;		
+;		sep #$20	
+;		ldx #$0000					; FIXME sometime fails to load colors 
+;		lda #$00
+;		sta.l $802121
+;	-	lda.l $7ffe00,x 
+;		sta.l $802122		
+;		inx
+;		cpx #$00200
+;		bmi - 
 		
-		sep #$20	
-		ldx #$0000					; FIXME sometime fails to load colors 
-		lda #$00
-		sta.l $802121
-	-	lda.l $7ffe00,x 
-		sta.l $802122		
-		inx
-		cpx #$00200
-		bmi - 
-		
-	+	rep #$30 
+;	+	rep #$30 
 
 	 	jsr incLoadFlag	
 		rts 
