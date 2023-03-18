@@ -16,6 +16,7 @@ org $C0FE81				; freeSpace
 		rti 
 
 	newGameLoop:
+		cli						; clear interrupts in this loop 
 		lda #$1ff
 		tcs 
 		
@@ -39,7 +40,9 @@ org $C0FE81				; freeSpace
 
 	-	wai
 		bra -
-
+;	-	
+;		bra -
+		
  
 org $C080F2                      		 
 		jsl saveFunctionEndFrame
@@ -394,12 +397,17 @@ pullPC		; -----------------------	; freeSpace  -------------------------------
 	
 	
 	savePaletteAnim:
+		lda.l $00102b 
+		cmp #$0036				; water level check?? 
+		beq +
+		cmp #$002b
+		beq +
 		LDX.W #$0000   			; src							
 		LDY.W #$e000   			; des 
 		LDA #$15fe   			; size 
 		MVN $7F,$7F  			; bank des src	
 		
-		jsr incSaveFlag		
+	+	jsr incSaveFlag		
 		rts 
 		
 	saveFrame00:
@@ -413,20 +421,20 @@ pullPC		; -----------------------	; freeSpace  -------------------------------
 		LDA #$01ff   			; size 
 		MVN $7F,$7E  			; bank des src	
 
-;		lda.l rJungleWeatherEffects		; will break colors when palette animations go on 
-;		bne +	
-;
-;		sep #$20	
-;		ldx #$0000			; backup palettes 
-;		lda #$00
-;		sta.l $802121
-;	-	lda.l $80213b
-;		sta.l $7ffe00,x 
-;		inx
-;		cpx #$00200
-;		bmi - 
+		lda.l rJungleWeatherEffects		; will break colors when palette animations go on 
+		bne +	
+
+		sep #$20	
+		ldx #$0000			; backup palettes 
+		lda #$00
+		sta.l $802121
+	-	lda.l $80213b
+		sta.l $7ffe00,x 
+		inx
+		cpx #$00200
+		bmi - 
 		
-;	+	rep #$30 
+	+	rep #$30 
 
 		jsr incSaveFlag		
 		rts 
@@ -546,6 +554,7 @@ pullPC		; -----------------------	; freeSpace  -------------------------------
 		lda #$0000
 		sta.l !saveFlag 
 
+		sei						; set interupt again 
 		lda #$80AB 
 		STA.B rGameModePointer             		
 		rts 
@@ -561,12 +570,18 @@ pullPC		; -----------------------	; freeSpace  -------------------------------
 		dw $0000,bufferFrameLoad,loadPaletteAnim,loadFrame00,loadFrame01,loadFrame02,loadFrame03,loadFrame04_DMA,loadFrame05_DMA,loadFrame06_DMA,loadFrameFF
 
 	loadPaletteAnim:			; breajs sine levels 
+		lda.l $00102b 
+		cmp #$0036				; water level check?? water level become corrupted FIXME!
+		beq +
+		cmp #$002b
+		beq +
+		
 		LDX.W #$e000   			; src							
 		LDY.W #$0000   			; des 
 		LDA #$15fe   			; size 
 		MVN $7F,$7F  			; bank des src	
 		
-		jsr incLoadFlag	
+	+	jsr incLoadFlag	
 		rts 
 
 	loadFrame00:				
@@ -580,20 +595,20 @@ pullPC		; -----------------------	; freeSpace  -------------------------------
 		LDA #$01ff   				; size 
 		MVN $7E,$7F  				; bank des src	
 
-;		lda.l rJungleWeatherEffects
-;		bne +
-;		
-;		sep #$20	
-;		ldx #$0000					; FIXME sometime fails to load colors 
-;		lda #$00
-;		sta.l $802121
-;	-	lda.l $7ffe00,x 
-;		sta.l $802122		
-;		inx
-;		cpx #$00200
-;		bmi - 
+		lda.l rJungleWeatherEffects
+		bne +
 		
-;	+	rep #$30 
+		sep #$20	
+		ldx #$0000					; FIXME sometime fails to load colors 
+		lda #$00
+		sta.l $802121
+	-	lda.l $7ffe00,x 
+		sta.l $802122		
+		inx
+		cpx #$00200
+		bmi - 
+		
+	+	rep #$30 
 
 	 	jsr incLoadFlag	
 		rts 
@@ -729,7 +744,8 @@ pullPC		; -----------------------	; freeSpace  -------------------------------
 		eor #$0040
 		sta.l rPlayer_Flag40Pause
 	
-	+	lda #$80AB 
+	+	sei						; set interupt again 
+		lda #$80AB 
 		STA.B rGameModePointer           
 		
 		rts  
